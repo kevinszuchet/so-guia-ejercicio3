@@ -18,7 +18,7 @@
 #define TAMANIORENGLON 1000
 
 struct Persona {
-	char* region;
+	char region[30];
 	char nombreYapellido[30];
 	int edad;
 	char telefono[15];
@@ -34,7 +34,10 @@ char* obtenerRenglonDeSalida(struct Persona*);
 int main(int argc, char *argv[]) {
 	FILE *fEntrada;
 	FILE *fSalida;
-	char *renglon = malloc(TAMANIORENGLON), *delim = ";", **arrRenglon;
+	char *renglon = malloc(TAMANIORENGLON);
+	char *delim = ";";
+	//le agrego el malloc porque fgets lo necesita
+	char **arrRenglon = malloc(TAMANIORENGLON);
 	int i = 0;
 	t_list* listaPersonas = list_create();
 
@@ -46,10 +49,13 @@ int main(int argc, char *argv[]) {
 	// ABRO EL ARCHIVO DE ENTRADA (LECTURA)
 	fEntrada = fopen(argv[1], "r");
 	if (fEntrada) {
-		while (!feof(fEntrada)) {
-			// LEO LOS RENGLONES DE ENTRADA
-			fgets(renglon, TAMANIORENGLON, fEntrada);
+		// LEO LOS RENGLONES DE ENTRADA
+		while (fgets(renglon, TAMANIORENGLON, fEntrada)) {
 			arrRenglon = string_split(renglon, delim);
+
+			//yo me ocuparia aca de hacer el filtro porque no tiene mucho sentido guardar en el array personas que no se van a
+			//guardar en el archivo nuevo. en cualquier caso, esas personas ya estan en el archivo viejo
+			//(no es que las vas a estar perdiendo)
 
 			// AGREGO PERSONAS A LA LISTA CON LA INFO SPLITEADA
 			agregarPersonas(arrRenglon, listaPersonas);
@@ -82,14 +88,17 @@ int main(int argc, char *argv[]) {
 
 void agregarPersonas(char** datosPersona, t_list* listaPersonas) {
 	struct Persona unaPersona;
+	//le agregue lugar a la region porque el strcpy lo necesita!
 	strcpy(unaPersona.region, datosPersona[0]);
-	/*strcpy(unaPersona.nombreYapellido, datosPersona[1]);
+	strcpy(unaPersona.nombreYapellido, datosPersona[1]);
 	unaPersona.edad = atoi(datosPersona[2]);
 	strcpy(unaPersona.telefono, datosPersona[3]);
 	strcpy(unaPersona.dni, datosPersona[4]);
+
+	//si haces lo que te decia en la linea 56: hace falta guardar el saldo? si mal no recuerdo, no lo pide en el archivo nuevo
 	unaPersona.saldo = atof(datosPersona[5]);
 
-	list_add(listaPersonas, &unaPersona);*/
+	list_add(listaPersonas, &unaPersona);
 }
 
 bool compararPersonas(struct Persona unaPersona, struct Persona otraPersona) {
@@ -102,6 +111,9 @@ bool menoresDe18(struct Persona unaPersona) {
 }
 
 char* obtenerRenglonDeSalida(struct Persona* unaPersona) {
+
+	//investiga la funcion sprintf, te va a ahorrar bastantes lineas en esta funcion!
+
 	char *nuevoRenglon = string_new();
 	string_append(&nuevoRenglon, unaPersona->region);
 	string_append(&nuevoRenglon, "|");
