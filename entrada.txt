@@ -1,0 +1,3 @@
+buenos aires;kevin szuchet;20;12345678;87654321;120487
+buenos aires;eze szuchet;17;12345678;7654321;0245
+buenos aires;tami szuchet;12;12345678;654321;100
