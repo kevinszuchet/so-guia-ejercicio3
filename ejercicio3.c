@@ -50,7 +50,6 @@ int main(int argc, char *argv[]) {
 		while (fgets(renglon, TAMANIORENGLON, fEntrada)) {
 			arrRenglon = string_split(renglon, delim);
 			Persona unaPersona;
-			obtenerPersona(arrRenglon, &unaPersona);
 			agregarPersona(arrRenglon, listaPersonas, &unaPersona);
 		}
 		fclose(fEntrada);
