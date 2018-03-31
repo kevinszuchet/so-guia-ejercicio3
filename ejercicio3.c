@@ -93,6 +93,12 @@ int main(int argc, char *argv[]) {
 }
 
 void agregarPersona(char **datosPersona, t_list *listaPersonas, Persona *unaPersona) {
+
+	Persona* pers:
+
+	//si se reemplaza unaPersona (variable declarada en el main) por pers, rompe
+	//y antes, cuando no rompia, mostraba bien el list_get(listaPersonas, 0) en esta funcion pero no en el main!!!
+
 	strcpy(unaPersona->region, datosPersona[0]);
 	strcpy(unaPersona->nombreYapellido, datosPersona[1]);
 	unaPersona->edad = atoi(datosPersona[2]);
