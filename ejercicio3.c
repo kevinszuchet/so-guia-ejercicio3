@@ -29,17 +29,15 @@ struct Persona {
 void agregarPersonas(char**, t_list*);
 bool compararPersonas(struct Persona, struct Persona);
 bool menoresDe18(struct Persona);
+bool saldoPobre(struct Persona);
 char* obtenerRenglonDeSalida(struct Persona*);
 
 int main(int argc, char *argv[]) {
-	FILE *fEntrada;
-	FILE *fSalida;
-	char *renglon = malloc(TAMANIORENGLON);
-	char *delim = ";";
-	//le agrego el malloc porque fgets lo necesita
-	char **arrRenglon = malloc(TAMANIORENGLON);
+	FILE *fEntrada, *fSalida, *fLog;
+	char *renglon = malloc(TAMANIORENGLON), *delim = ";", **arrRenglon = malloc(TAMANIORENGLON);
+	t_list *listaPersonas = list_create(), *listaFiltrada = list_create();
 	int i = 0;
-	t_list* listaPersonas = list_create();
+	struct Persona *unaPersona = NULL;
 
 	if (argc != 2) {
 		printf("%s\n", "Debe ingresar 1 archivo de entrada para poder leer");
@@ -52,12 +50,6 @@ int main(int argc, char *argv[]) {
 		// LEO LOS RENGLONES DE ENTRADA
 		while (fgets(renglon, TAMANIORENGLON, fEntrada)) {
 			arrRenglon = string_split(renglon, delim);
-
-			//yo me ocuparia aca de hacer el filtro porque no tiene mucho sentido guardar en el array personas que no se van a
-			//guardar en el archivo nuevo. en cualquier caso, esas personas ya estan en el archivo viejo
-			//(no es que las vas a estar perdiendo)
-
-			// AGREGO PERSONAS A LA LISTA CON LA INFO SPLITEADA
 			agregarPersonas(arrRenglon, listaPersonas);
 		}
 		fclose(fEntrada);
@@ -67,35 +59,46 @@ int main(int argc, char *argv[]) {
 	}
 
 	// ABRO EL ARCHIVO DE SALIDA (LECTURA Y ESCRITURA)
-	/*fSalida = txt_open_for_append("salida.txt");
-	 if(fSalida) {
-	 // ORDENO LA LISTA POR REGION Y EDAD
-	 t_list* personasFiltradas = list_filter(listaPersonas, menoresDe18);
-	 list_sort(listaPersonas, compararPersonas);
-	 for(i = 0; i < list_size(personasFiltradas); i++) {
-	 struct Persona* unaPersona = list_get(personasFiltradas, i);
-	 txt_write_in_file(fSalida, obtenerRenglonDeSalida(unaPersona));
-	 }
+	fSalida = txt_open_for_append("salida.txt");
+	if(fSalida) {
+		// ORDENO LA LISTA POR REGION Y EDAD
+		listaFiltrada = list_filter(listaPersonas, menoresDe18);
+		list_sort(listaFiltrada, compararPersonas);
+		for(i = 0; i < list_size(listaFiltrada); i++) {
+			unaPersona = list_get(listaFiltrada, i);
+			txt_write_in_file(fSalida, obtenerRenglonDeSalida(unaPersona));
+		}
+		fclose(fSalida);
+	} else {
+		printf("%s\n", "No se puedo abrir el archivo de salida");
+		return EXIT_FAILURE;
+	}
 
-	 fclose(fSalida);
-	 } else {
-	 printf("%s\n", "No se puedo abrir el archivo de salida");
-	 return EXIT_FAILURE;
-	 }*/
+	// ABRO EL ARCHIVO DE LOGGEO
+	fLog = txt_open_for_append("log.txt");
+	if(fLog) {
+		listaFiltrada = list_filter(listaPersonas, saldoPobre);
+		for(i = 0; i < list_size(listaFiltrada); i++) {
+			unaPersona = list_get(listaFiltrada, i);
+			t_log *logger = log_create(fLog, "ejercicio3", true, log_level_from_string(obtenerRenglonDeSalida(unaPersona)));
+			log_trace(logger, obtenerRenglonDeSalida(unaPersona));
+		}
+		fclose(fLog);
+	} else {
+		 printf("%s\n", "No se puedo abrir el archivo de loggeo");
+		 return EXIT_FAILURE;
+	}
 
 	return 0;
 }
 
-void agregarPersonas(char** datosPersona, t_list* listaPersonas) {
+void agregarPersonas(char **datosPersona, t_list *listaPersonas) {
 	struct Persona unaPersona;
-	//le agregue lugar a la region porque el strcpy lo necesita!
 	strcpy(unaPersona.region, datosPersona[0]);
 	strcpy(unaPersona.nombreYapellido, datosPersona[1]);
 	unaPersona.edad = atoi(datosPersona[2]);
 	strcpy(unaPersona.telefono, datosPersona[3]);
 	strcpy(unaPersona.dni, datosPersona[4]);
-
-	//si haces lo que te decia en la linea 56: hace falta guardar el saldo? si mal no recuerdo, no lo pide en el archivo nuevo
 	unaPersona.saldo = atof(datosPersona[5]);
 
 	list_add(listaPersonas, &unaPersona);
@@ -110,20 +113,14 @@ bool menoresDe18(struct Persona unaPersona) {
 	return unaPersona.edad < 18;
 }
 
+bool saldoPobre(struct Persona unaPersona) {
+	return unaPersona.saldo < 100;
+}
+
 char* obtenerRenglonDeSalida(struct Persona* unaPersona) {
 
-	//investiga la funcion sprintf, te va a ahorrar bastantes lineas en esta funcion!
-
 	char *nuevoRenglon = string_new();
-	string_append(&nuevoRenglon, unaPersona->region);
-	string_append(&nuevoRenglon, "|");
-	string_append(&nuevoRenglon, string_itoa(unaPersona->edad));
-	string_append(&nuevoRenglon, "|");
-	string_append(&nuevoRenglon, unaPersona->dni);
-	string_append(&nuevoRenglon, "|");
-	string_append(&nuevoRenglon, unaPersona->nombreYapellido);
-	string_append(&nuevoRenglon, "|");
-	string_append(&nuevoRenglon, unaPersona->telefono);
+	sprintf(nuevoRenglon, "%s|%d|%s|%s|%s\n", unaPersona->region, unaPersona->edad, unaPersona->dni, unaPersona->nombreYapellido, unaPersona->telefono);
 
 	return nuevoRenglon;
 }
