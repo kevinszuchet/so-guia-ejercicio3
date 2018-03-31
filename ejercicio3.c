@@ -26,13 +26,13 @@ typedef struct Persona {
 	double saldo;
 } Persona;
 
-void obtenerPersona(char**, Persona*);
+void agregarPersona(char**, t_list*, Persona*);
 bool compararPersonas(Persona, Persona);
 bool menoresDe18(Persona);
 bool saldoPobre(Persona);
 char* obtenerRenglonDeSalida(Persona*);
 
-void agregarPersona(t_list* listaPersonas, Persona unaPersona){
+void agregarPersonaNato(t_list* listaPersonas, Persona unaPersona){
 	list_add(listaPersonas, &unaPersona);
 }
 
@@ -55,9 +55,11 @@ int main(int argc, char *argv[]) {
 			arrRenglon = string_split(renglon, delim);
 			Persona unaPersona;
 			obtenerPersona(arrRenglon, &unaPersona);
-			agregarPersona(listaPersonas, unaPersona);
+			agregarPersonaNato(listaPersonas, unaPersona);
 			Persona *otraPersona = list_get(listaPersonas, 0);
 			printf("%d\n", otraPersona->edad);
+			//decime si ese printf mostro bien. a mi me muestra mal
+			agregarPersona(arrRenglon, listaPersonas, &unaPersona);
 		}
 		fclose(fEntrada);
 	} else {
@@ -65,14 +67,14 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	/*// ABRO EL ARCHIVO DE SALIDA (LECTURA Y ESCRITURA)
+	// ABRO EL ARCHIVO DE SALIDA (LECTURA Y ESCRITURA)
 	fSalida = txt_open_for_append("salida.txt");
 	if(fSalida) {
 		// ORDENO LA LISTA POR REGION Y EDAD
 		listaFiltrada = list_filter(listaPersonas, menoresDe18);
 		list_sort(listaFiltrada, compararPersonas);
 		for(i = 0; i < list_size(listaFiltrada); i++) {
-			unaPersona = list_get(listaFiltrada, i);
+			Persona *unaPersona = list_get(listaFiltrada, i);
 			txt_write_in_file(fSalida, obtenerRenglonDeSalida(unaPersona));
 		}
 		fclose(fSalida);
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
 	if(fLog) {
 		listaFiltrada = list_filter(listaPersonas, saldoPobre);
 		for(i = 0; i < list_size(listaFiltrada); i++) {
-			unaPersona = list_get(listaFiltrada, i);
+			Persona *unaPersona = list_get(listaFiltrada, i);
 			t_log *logger = log_create(fLog, "ejercicio3", true, log_level_from_string(obtenerRenglonDeSalida(unaPersona)));
 			log_trace(logger, obtenerRenglonDeSalida(unaPersona));
 		}
@@ -94,18 +96,20 @@ int main(int argc, char *argv[]) {
 	} else {
 		 printf("%s\n", "No se puedo abrir el archivo de loggeo");
 		 return EXIT_FAILURE;
-	}*/
+	}
 
 	return 0;
 }
 
-void obtenerPersona(char **datosPersona, Persona *unaPersona) {
+void agregarPersona(char **datosPersona, t_list *listaPersonas, Persona *unaPersona) {
 	strcpy(unaPersona->region, datosPersona[0]);
 	strcpy(unaPersona->nombreYapellido, datosPersona[1]);
 	unaPersona->edad = atoi(datosPersona[2]);
 	strcpy(unaPersona->telefono, datosPersona[3]);
 	strcpy(unaPersona->dni, datosPersona[4]);
 	unaPersona->saldo = atof(datosPersona[5]);
+
+	list_add(listaPersonas, unaPersona);
 }
 
 bool compararPersonas(Persona unaPersona, Persona otraPersona) {
