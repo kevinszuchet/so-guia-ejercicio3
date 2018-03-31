@@ -97,7 +97,7 @@ void agregarPersona(char **datosPersona, t_list *listaPersonas, Persona *unaPers
 	Persona* pers:
 
 	//si se reemplaza unaPersona (variable declarada en el main) por pers, rompe
-	//y antes, cuando no rompia, mostraba bien el list_get(listaPersonas, 0) en esta funcion pero no en el main!!!
+	//y antes, cuando se usaba una struct Persona pers (revisar commit 30afe8b..), mostraba bien el list_get(listaPersonas, 0) en esta funcion pero no en el main!!!
 
 	strcpy(unaPersona->region, datosPersona[0]);
 	strcpy(unaPersona->nombreYapellido, datosPersona[1]);
