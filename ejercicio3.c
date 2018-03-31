@@ -32,6 +32,10 @@ bool menoresDe18(Persona);
 bool saldoPobre(Persona);
 char* obtenerRenglonDeSalida(Persona*);
 
+void agregarPersona(t_list* listaPersonas, Persona unaPersona){
+	list_add(listaPersonas, &unaPersona);
+}
+
 int main(int argc, char *argv[]) {
 	FILE *fEntrada, *fSalida, *fLog;
 	char *renglon = malloc(TAMANIORENGLON), *delim = ";", **arrRenglon = malloc(TAMANIORENGLON);
@@ -51,7 +55,9 @@ int main(int argc, char *argv[]) {
 			arrRenglon = string_split(renglon, delim);
 			Persona unaPersona;
 			obtenerPersona(arrRenglon, &unaPersona);
-			list_add(listaPersonas, &unaPersona);
+			agregarPersona(listaPersonas, unaPersona);
+			Persona *otraPersona = list_get(listaPersonas, 0);
+			printf("%d\n", otraPersona->edad);
 		}
 		fclose(fEntrada);
 	} else {
