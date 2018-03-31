@@ -17,27 +17,26 @@
 
 #define TAMANIORENGLON 1000
 
-struct Persona {
+typedef struct Persona {
 	char region[30];
 	char nombreYapellido[30];
 	int edad;
 	char telefono[15];
 	char dni[10];
 	double saldo;
-};
+} Persona;
 
-void agregarPersonas(char**, t_list*);
-bool compararPersonas(struct Persona, struct Persona);
-bool menoresDe18(struct Persona);
-bool saldoPobre(struct Persona);
-char* obtenerRenglonDeSalida(struct Persona*);
+void obtenerPersona(char**, Persona*);
+bool compararPersonas(Persona, Persona);
+bool menoresDe18(Persona);
+bool saldoPobre(Persona);
+char* obtenerRenglonDeSalida(Persona*);
 
 int main(int argc, char *argv[]) {
 	FILE *fEntrada, *fSalida, *fLog;
 	char *renglon = malloc(TAMANIORENGLON), *delim = ";", **arrRenglon = malloc(TAMANIORENGLON);
 	t_list *listaPersonas = list_create(), *listaFiltrada = list_create();
 	int i = 0;
-	struct Persona *unaPersona = NULL;
 
 	if (argc != 2) {
 		printf("%s\n", "Debe ingresar 1 archivo de entrada para poder leer");
@@ -50,7 +49,9 @@ int main(int argc, char *argv[]) {
 		// LEO LOS RENGLONES DE ENTRADA
 		while (fgets(renglon, TAMANIORENGLON, fEntrada)) {
 			arrRenglon = string_split(renglon, delim);
-			agregarPersonas(arrRenglon, listaPersonas);
+			Persona unaPersona;
+			obtenerPersona(arrRenglon, &unaPersona);
+			list_add(listaPersonas, &unaPersona);
 		}
 		fclose(fEntrada);
 	} else {
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	// ABRO EL ARCHIVO DE SALIDA (LECTURA Y ESCRITURA)
+	/*// ABRO EL ARCHIVO DE SALIDA (LECTURA Y ESCRITURA)
 	fSalida = txt_open_for_append("salida.txt");
 	if(fSalida) {
 		// ORDENO LA LISTA POR REGION Y EDAD
@@ -87,37 +88,34 @@ int main(int argc, char *argv[]) {
 	} else {
 		 printf("%s\n", "No se puedo abrir el archivo de loggeo");
 		 return EXIT_FAILURE;
-	}
+	}*/
 
 	return 0;
 }
 
-void agregarPersonas(char **datosPersona, t_list *listaPersonas) {
-	struct Persona unaPersona;
-	strcpy(unaPersona.region, datosPersona[0]);
-	strcpy(unaPersona.nombreYapellido, datosPersona[1]);
-	unaPersona.edad = atoi(datosPersona[2]);
-	strcpy(unaPersona.telefono, datosPersona[3]);
-	strcpy(unaPersona.dni, datosPersona[4]);
-	unaPersona.saldo = atof(datosPersona[5]);
-
-	list_add(listaPersonas, &unaPersona);
+void obtenerPersona(char **datosPersona, Persona *unaPersona) {
+	strcpy(unaPersona->region, datosPersona[0]);
+	strcpy(unaPersona->nombreYapellido, datosPersona[1]);
+	unaPersona->edad = atoi(datosPersona[2]);
+	strcpy(unaPersona->telefono, datosPersona[3]);
+	strcpy(unaPersona->dni, datosPersona[4]);
+	unaPersona->saldo = atof(datosPersona[5]);
 }
 
-bool compararPersonas(struct Persona unaPersona, struct Persona otraPersona) {
+bool compararPersonas(Persona unaPersona, Persona otraPersona) {
 	return (unaPersona.region < otraPersona.region)
 			|| (unaPersona.edad <= otraPersona.edad);
 }
 
-bool menoresDe18(struct Persona unaPersona) {
+bool menoresDe18(Persona unaPersona) {
 	return unaPersona.edad < 18;
 }
 
-bool saldoPobre(struct Persona unaPersona) {
+bool saldoPobre(Persona unaPersona) {
 	return unaPersona.saldo < 100;
 }
 
-char* obtenerRenglonDeSalida(struct Persona* unaPersona) {
+char* obtenerRenglonDeSalida(Persona* unaPersona) {
 
 	char *nuevoRenglon = string_new();
 	sprintf(nuevoRenglon, "%s|%d|%s|%s|%s\n", unaPersona->region, unaPersona->edad, unaPersona->dni, unaPersona->nombreYapellido, unaPersona->telefono);
