@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
 void agregarPersona(char **datosPersona, t_list *listaPersonas, Persona *unaPersona) {
 
-	Persona* pers:
+	Persona* pers;
 
 	//si se reemplaza unaPersona (variable declarada en el main) por pers, rompe
 	//y antes, cuando se usaba una struct Persona pers (revisar commit 30afe8b..), mostraba bien el list_get(listaPersonas, 0) en esta funcion pero no en el main!!!
