@@ -88,6 +88,9 @@ int main(int argc, char *argv[]) {
 		 printf("%s\n", "No se puedo abrir el archivo de loggeo");
 		 return EXIT_FAILURE;
 	}
+	
+	free(renglon);
+	free(arrRenglon);
 
 	return 0;
 }
