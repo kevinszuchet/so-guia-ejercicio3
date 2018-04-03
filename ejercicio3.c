@@ -58,6 +58,9 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	free(renglon);
+	free(arrRenglon);
+
 	Persona *pUnaPersona = NULL;
 
 	// ABRO EL ARCHIVO DE SALIDA (LECTURA Y ESCRITURA)
@@ -68,7 +71,9 @@ int main(int argc, char *argv[]) {
 		list_sort(listaFiltrada, compararPersonas);
 		for(i = 0; i < list_size(listaFiltrada); i++) {
 			pUnaPersona = list_get(listaFiltrada, i);
-			txt_write_in_file(fSalida, obtenerRenglonDeSalida(pUnaPersona));
+			renglon = obtenerRenglonDeSalida(pUnaPersona);
+			txt_write_in_file(fSalida, renglon);
+			free(renglon);
 		}
 		fclose(fSalida);
 	} else {
@@ -81,12 +86,11 @@ int main(int argc, char *argv[]) {
 	t_log *logger = log_create("log.txt", "ejercicio3", true, LOG_LEVEL_TRACE);
 	for (i = 0; i < list_size(listaFiltrada); i++) {
 		pUnaPersona = list_get(listaFiltrada, i);
-		log_trace(logger, obtenerRenglonDeSalida(pUnaPersona));
+		renglon = obtenerRenglonDeSalida(pUnaPersona);
+		log_trace(logger, renglon);
+		free(renglon);
 	}
 	log_destroy(logger);
-
-	free(renglon);
-	free(arrRenglon);
 
 	return 0;
 }
@@ -117,7 +121,7 @@ bool saldoPobre(Persona unaPersona) {
 
 char* obtenerRenglonDeSalida(Persona* unaPersona) {
 
-	char *nuevoRenglon = string_new();
+	char *nuevoRenglon = malloc(1000);
 	sprintf(nuevoRenglon, "%s|%d|%s|%s|%s\n", unaPersona->region, unaPersona->edad, unaPersona->dni, unaPersona->nombreYapellido, unaPersona->telefono);
 
 	return nuevoRenglon;
