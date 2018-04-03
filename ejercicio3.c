@@ -33,7 +33,7 @@ bool saldoPobre(Persona);
 char* obtenerRenglonDeSalida(Persona*);
 
 int main(int argc, char *argv[]) {
-	FILE *fEntrada, *fSalida, *fLog;
+	FILE *fEntrada, *fSalida;
 	char *renglon = malloc(TAMANIORENGLON), *delim = ";", **arrRenglon = malloc(TAMANIORENGLON);
 	t_list *listaPersonas = list_create(), *listaFiltrada = list_create();
 	int i = 0;
@@ -58,6 +58,8 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	Persona *pUnaPersona = NULL;
+
 	// ABRO EL ARCHIVO DE SALIDA (LECTURA Y ESCRITURA)
 	fSalida = txt_open_for_append("salida.txt");
 	if(fSalida) {
@@ -65,8 +67,8 @@ int main(int argc, char *argv[]) {
 		listaFiltrada = list_filter(listaPersonas, menoresDe18);
 		list_sort(listaFiltrada, compararPersonas);
 		for(i = 0; i < list_size(listaFiltrada); i++) {
-			Persona *unaPersona = list_get(listaFiltrada, i);
-			txt_write_in_file(fSalida, obtenerRenglonDeSalida(unaPersona));
+			pUnaPersona = list_get(listaFiltrada, i);
+			txt_write_in_file(fSalida, obtenerRenglonDeSalida(pUnaPersona));
 		}
 		fclose(fSalida);
 	} else {
@@ -75,20 +77,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	// ABRO EL ARCHIVO DE LOGGEO
-	fLog = txt_open_for_append("log.txt");
-	if(fLog) {
-		listaFiltrada = list_filter(listaPersonas, saldoPobre);
-		for(i = 0; i < list_size(listaFiltrada); i++) {
-			Persona *unaPersona = list_get(listaFiltrada, i);
-			t_log *logger = log_create(fLog, "ejercicio3", true, log_level_from_string(obtenerRenglonDeSalida(unaPersona)));
-			log_trace(logger, obtenerRenglonDeSalida(unaPersona));
-		}
-		fclose(fLog);
-	} else {
-		 printf("%s\n", "No se puedo abrir el archivo de loggeo");
-		 return EXIT_FAILURE;
+	listaFiltrada = list_filter(listaPersonas, saldoPobre);
+	t_log *logger = log_create("log.txt", "ejercicio3", true, LOG_LEVEL_TRACE);
+	for (i = 0; i < list_size(listaFiltrada); i++) {
+		pUnaPersona = list_get(listaFiltrada, i);
+		log_trace(logger, obtenerRenglonDeSalida(pUnaPersona));
 	}
-	
+	log_destroy(logger);
+
 	free(renglon);
 	free(arrRenglon);
 
@@ -96,12 +92,6 @@ int main(int argc, char *argv[]) {
 }
 
 void agregarPersona(char **datosPersona, t_list *listaPersonas, Persona *unaPersona) {
-
-	Persona* pers;
-
-	//si se reemplaza unaPersona (variable declarada en el main) por pers, rompe
-	//y antes, cuando se usaba una struct Persona pers (revisar commit 30afe8b..), mostraba bien el list_get(listaPersonas, 0) en esta funcion pero no en el main!!!
-
 	strcpy(unaPersona->region, datosPersona[0]);
 	strcpy(unaPersona->nombreYapellido, datosPersona[1]);
 	unaPersona->edad = atoi(datosPersona[2]);
