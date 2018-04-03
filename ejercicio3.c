@@ -45,11 +45,11 @@ int main(int argc, char *argv[]) {
 
 	// ABRO EL ARCHIVO DE ENTRADA (LECTURA)
 	fEntrada = fopen(argv[1], "r");
+	Persona unaPersona;
 	if (fEntrada) {
 		// LEO LOS RENGLONES DE ENTRADA
 		while (fgets(renglon, TAMANIORENGLON, fEntrada)) {
-			arrRenglon = string_split(renglon, delim);
-			Persona unaPersona;
+			strcpy(arrRenglon, string_split(renglon, delim));
 			agregarPersona(arrRenglon, listaPersonas, &unaPersona);
 		}
 		fclose(fEntrada);
@@ -57,9 +57,6 @@ int main(int argc, char *argv[]) {
 		printf("%s\n", "No se puedo abrir el archivo de entrada");
 		return EXIT_FAILURE;
 	}
-
-	free(renglon);
-	free(arrRenglon);
 
 	Persona *pUnaPersona = NULL;
 
@@ -71,9 +68,8 @@ int main(int argc, char *argv[]) {
 		list_sort(listaFiltrada, compararPersonas);
 		for(i = 0; i < list_size(listaFiltrada); i++) {
 			pUnaPersona = list_get(listaFiltrada, i);
-			renglon = obtenerRenglonDeSalida(pUnaPersona);
+			strcpy(renglon, obtenerRenglonDeSalida(pUnaPersona));
 			txt_write_in_file(fSalida, renglon);
-			free(renglon);
 		}
 		fclose(fSalida);
 	} else {
@@ -81,18 +77,17 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	list_destroy(listaFiltrada);
-	listaFiltrada = list_create();
-
 	// ABRO EL ARCHIVO DE LOGGEO
 	listaFiltrada = list_filter(listaPersonas, saldoPobre);
 	t_log *logger = log_create("log.txt", "ejercicio3", true, LOG_LEVEL_TRACE);
 	for (i = 0; i < list_size(listaFiltrada); i++) {
 		pUnaPersona = list_get(listaFiltrada, i);
-		renglon = obtenerRenglonDeSalida(pUnaPersona);
+		strcpy(renglon, obtenerRenglonDeSalida(pUnaPersona));
 		log_trace(logger, renglon);
-		free(renglon);
 	}
+
+	free(renglon);
+	free(arrRenglon);
 	log_destroy(logger);
 
 	list_destroy(listaFiltrada);
