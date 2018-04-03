@@ -27,9 +27,9 @@ typedef struct Persona {
 } Persona;
 
 void agregarPersona(char**, t_list*, Persona*);
-bool compararPersonas(Persona, Persona);
-bool menoresDe18(Persona);
-bool saldoPobre(Persona);
+bool compararPersonas(Persona*, Persona*);
+bool menoresDe18(Persona*);
+bool saldoPobre(Persona*);
 char* obtenerRenglonDeSalida(Persona*);
 
 int main(int argc, char *argv[]) {
@@ -81,6 +81,9 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	list_destroy(listaFiltrada);
+	listaFiltrada = list_create();
+
 	// ABRO EL ARCHIVO DE LOGGEO
 	listaFiltrada = list_filter(listaPersonas, saldoPobre);
 	t_log *logger = log_create("log.txt", "ejercicio3", true, LOG_LEVEL_TRACE);
@@ -91,6 +94,9 @@ int main(int argc, char *argv[]) {
 		free(renglon);
 	}
 	log_destroy(logger);
+
+	list_destroy(listaFiltrada);
+	list_destroy(listaPersonas);
 
 	return 0;
 }
@@ -106,17 +112,17 @@ void agregarPersona(char **datosPersona, t_list *listaPersonas, Persona *unaPers
 	list_add(listaPersonas, unaPersona);
 }
 
-bool compararPersonas(Persona unaPersona, Persona otraPersona) {
-	return (unaPersona.region < otraPersona.region)
-			|| (unaPersona.edad <= otraPersona.edad);
+bool compararPersonas(Persona *unaPersona, Persona *otraPersona) {
+	return (unaPersona->region < otraPersona->region)
+			|| (unaPersona->edad <= otraPersona->edad);
 }
 
-bool menoresDe18(Persona unaPersona) {
-	return unaPersona.edad < 18;
+bool menoresDe18(Persona *unaPersona) {
+	return (unaPersona->edad < 18);
 }
 
-bool saldoPobre(Persona unaPersona) {
-	return unaPersona.saldo < 100;
+bool saldoPobre(Persona *unaPersona) {
+	return (unaPersona->saldo < 100);
 }
 
 char* obtenerRenglonDeSalida(Persona* unaPersona) {
