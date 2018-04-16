@@ -1,7 +1,7 @@
 /*
- * ejercicio3.c
+ * main.c
  *
- *  Created on: 24/3/2018
+ *  Created on: 15 abr. 2018
  *      Author: utnso
  */
 
@@ -31,11 +31,12 @@ bool compararPersonas(Persona*, Persona*);
 bool menoresDe18(Persona*);
 bool saldoPobre(Persona*);
 char* obtenerRenglonDeSalida(Persona*);
+void personaDestroy(Persona*);
 
 int main(int argc, char *argv[]) {
 	FILE *fEntrada, *fSalida;
 	char *renglon = malloc(TAMANIORENGLON), *delim = ";", **arrRenglon = malloc(TAMANIORENGLON);
-	t_list *listaPersonas = list_create(), *listaFiltrada = list_create();
+	t_list *listaPersonas = list_create();
 	int i = 0;
 
 	if (argc != 2) {
@@ -45,12 +46,12 @@ int main(int argc, char *argv[]) {
 
 	// ABRO EL ARCHIVO DE ENTRADA (LECTURA)
 	fEntrada = fopen(argv[1], "r");
-	Persona unaPersona;
 	if (fEntrada) {
 		// LEO LOS RENGLONES DE ENTRADA
 		while (fgets(renglon, TAMANIORENGLON, fEntrada)) {
-			strcpy(arrRenglon, string_split(renglon, delim));
-			agregarPersona(arrRenglon, listaPersonas, &unaPersona);
+			Persona *unaPersona = malloc(sizeof(Persona));
+			arrRenglon = string_split(renglon, delim);
+			agregarPersona(arrRenglon, listaPersonas, unaPersona);
 		}
 		fclose(fEntrada);
 	} else {
@@ -64,6 +65,7 @@ int main(int argc, char *argv[]) {
 	fSalida = txt_open_for_append("salida.txt");
 	if(fSalida) {
 		// ORDENO LA LISTA POR REGION Y EDAD
+		t_list *listaFiltrada = list_create();
 		listaFiltrada = list_filter(listaPersonas, menoresDe18);
 		list_sort(listaFiltrada, compararPersonas);
 		for(i = 0; i < list_size(listaFiltrada); i++) {
@@ -71,6 +73,7 @@ int main(int argc, char *argv[]) {
 			strcpy(renglon, obtenerRenglonDeSalida(pUnaPersona));
 			txt_write_in_file(fSalida, renglon);
 		}
+		list_destroy(listaFiltrada);
 		fclose(fSalida);
 	} else {
 		printf("%s\n", "No se puedo abrir el archivo de salida");
@@ -78,6 +81,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// ABRO EL ARCHIVO DE LOGGEO
+	t_list *listaFiltrada = list_create();
 	listaFiltrada = list_filter(listaPersonas, saldoPobre);
 	t_log *logger = log_create("log.txt", "ejercicio3", true, LOG_LEVEL_TRACE);
 	for (i = 0; i < list_size(listaFiltrada); i++) {
@@ -85,15 +89,15 @@ int main(int argc, char *argv[]) {
 		strcpy(renglon, obtenerRenglonDeSalida(pUnaPersona));
 		log_trace(logger, renglon);
 	}
+	list_destroy(listaFiltrada);
 
 	free(renglon);
 	free(arrRenglon);
 	log_destroy(logger);
 
-	list_destroy(listaFiltrada);
-	list_destroy(listaPersonas);
+	list_destroy_and_destroy_elements(listaPersonas, (void*) personaDestroy);
 
-	return 0;
+	exit(EXIT_SUCCESS);
 }
 
 void agregarPersona(char **datosPersona, t_list *listaPersonas, Persona *unaPersona) {
@@ -126,4 +130,8 @@ char* obtenerRenglonDeSalida(Persona* unaPersona) {
 	sprintf(nuevoRenglon, "%s|%d|%s|%s|%s\n", unaPersona->region, unaPersona->edad, unaPersona->dni, unaPersona->nombreYapellido, unaPersona->telefono);
 
 	return nuevoRenglon;
+}
+
+void personaDestroy(Persona *persona) {
+	free(persona);
 }
